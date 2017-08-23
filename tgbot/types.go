@@ -22,6 +22,7 @@ type Integer int64
 // User https://core.telegram.org/bots/api#user
 type User struct {
 	ID        Integer `json:"id"`         // Unique identifier for this user or bot
+	IsBot     bool    `json:"is_bot"`     // True, if this user is a bot
 	FirstName string  `json:"first_name"` // User's or bot's first name
 
 	// Optional
