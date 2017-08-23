@@ -85,3 +85,19 @@ func (response Response) GetResultMessage() (*Message, error) {
 
 	return &message, nil
 }
+
+// GetResultFile safely gets Result from Ok==true response as Message
+func (response Response) GetResultFile() (*File, error) {
+	result, err := response.GetRawResult()
+	if err != nil {
+		return nil, errors.New("tgbot.Response.GetResultFile: " + err.Error())
+	}
+
+	var file File
+	err = json.Unmarshal(*result, &file)
+	if err != nil {
+		return nil, errors.New("tgbot.Response.GetResultFile unmarshal result as Message:" + err.Error())
+	}
+
+	return &file, nil
+}
