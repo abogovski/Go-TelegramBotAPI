@@ -8,6 +8,8 @@ import "encoding/json"
 
 // Dummy type for json-structs that are not implemented yet
 type Dummy *json.RawMessage
+
+// Placeholder Some fields are placeholders
 type Placeholder Dummy
 
 // Integer represents Telegram's Integer type
