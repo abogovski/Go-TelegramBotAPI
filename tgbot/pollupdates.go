@@ -33,19 +33,18 @@ func PollUpdatesCB(botAPIURL string, params Params, handleUpdates func([]Update,
 }
 
 // PollUpdates .
-func PollUpdates(botAPIURL string, params Params, output chan<- Update, stop <-chan struct{}) (Integer, int, error) {
+func PollUpdates(botAPIURL string, params Params, output chan<- Update, stop *int32) (Integer, int, error) {
 	handleUpdates := func(updates []Update, offset Integer) (Integer, bool) {
 		for _, update := range updates {
-			select {
-			case <-stop:
+			if *stop > 0 {
 				close(output)
 				return offset, false
-			default:
-				offset = update.UpdateID + 1
-				output <- update
 			}
+			offset = update.UpdateID + 1
+			output <- update
 		}
 		return 0, true
 	}
+
 	return PollUpdatesCB(botAPIURL, params, handleUpdates)
 }
