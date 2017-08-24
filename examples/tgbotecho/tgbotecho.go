@@ -32,7 +32,7 @@ func main() {
 	log.Print("TelegramBot API endpoint: " + APIURL)
 
 	// GetMe
-	user, err := tgbot.GetMe(APIURL)
+	user, _, err := tgbot.GetMe(APIURL)
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
@@ -44,25 +44,28 @@ func main() {
 	lastUpdateID := tgbot.Integer(-1)
 	for true {
 		// poll Messages
-		updates, err := tgbot.GetUpdates(APIURL, tgbot.Params{
+		updates, _, err := tgbot.GetUpdates(APIURL, tgbot.Params{
 			"offset":          lastUpdateID + 1,
 			"timeout":         15,
 			"allowed_updates": []string{"messages"}})
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln(err)
 			os.Exit(1)
 		}
-		log.Printf("received %v updates", len(updates))
+		log.Printf("received %v updates\n", len(updates))
 		for i := range updates {
 			lastUpdateID = updates[i].UpdateID
 			if updates[i].Message != nil && updates[i].Message.Text != nil {
 				receivedMessage := updates[i].Message
-				_, err := tgbot.SendMessage(APIURL, tgbot.Params{
+				_, status, err := tgbot.SendMessage(APIURL, tgbot.Params{
 					"chat_id":             receivedMessage.Chat.ID,
 					"text":                "Echo " + *receivedMessage.Text,
 					"reply_to_message_id": receivedMessage.ID})
-				if err != nil {
-					log.Fatalf("failed echo message: %v", receivedMessage.ID)
+				msgID, msgText := receivedMessage.ID, receivedMessage.Text
+				if status == 429 {
+					log.Printf("Skipped text message %v: \"%v\" due to rate limits\n", msgID, msgText)
+				} else if err != nil {
+					log.Fatalf("Failed to echo text message %v: %v\n\tReason: %v\n", msgID, msgText, err)
 					os.Exit(1)
 				}
 			}
