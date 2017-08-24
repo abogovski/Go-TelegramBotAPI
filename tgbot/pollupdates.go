@@ -1,6 +1,9 @@
 package tgbot
 
-import "log"
+import (
+	"log"
+	"sync/atomic"
+)
 
 // PollUpdatesCB .
 func PollUpdatesCB(botAPIURL string, params Params, handleUpdates func([]Update, Integer) (Integer, bool)) (Integer, int, error) {
@@ -36,7 +39,8 @@ func PollUpdatesCB(botAPIURL string, params Params, handleUpdates func([]Update,
 func PollUpdates(botAPIURL string, params Params, output chan<- Update, stop *int32) (Integer, int, error) {
 	handleUpdates := func(updates []Update, offset Integer) (Integer, bool) {
 		for _, update := range updates {
-			if *stop > 0 {
+			if atomic.LoadInt32(stop) > 0 {
+				log.Println("PollUpdates received stop.")
 				close(output)
 				return offset, false
 			}
