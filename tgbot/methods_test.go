@@ -12,9 +12,14 @@ func TestGetMe(t *testing.T) {
 		return
 	}
 
-	user, err := GetMe(APIURL)
+	user, status, err := GetMe(APIURL)
 	if err != nil {
 		t.Fatal("getMe failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("getMe status is %v (not 200 OK)\n", status)
 		return
 	}
 
@@ -31,9 +36,14 @@ func TestGetUpdates(t *testing.T) {
 		return
 	}
 
-	updates, err := GetUpdates(APIURL, Params{"limit": 5, "timeout": 0})
+	updates, status, err := GetUpdates(APIURL, Params{"limit": 5, "timeout": 0})
 	if err != nil {
 		t.Fatal("getUpdates failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("GET getUpdates httpStatus is %v (not 200 OK)\n", status)
 		return
 	}
 

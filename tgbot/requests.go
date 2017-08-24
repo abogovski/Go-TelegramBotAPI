@@ -36,12 +36,12 @@ func (r request) log() {
 		r.method, r.url, r.status, r.response, r.finishedWith)
 }
 
-func (r *request) process(httpResponse *http.Response, err error) (*Response, error) {
+func (r *request) process(httpResponse *http.Response, err error) (*Response, int, error) {
 	defer func(r *request) { r.log() }(r)
 
 	if err != nil {
 		r.finishedWith = err.Error()
-		return nil, errors.New("tgbot " + r.method + " request failed: " + err.Error())
+		return nil, httpResponse.StatusCode, errors.New("tgbot " + r.method + " request failed: " + err.Error())
 	}
 	r.status = httpResponse.Status
 
@@ -54,22 +54,22 @@ func (r *request) process(httpResponse *http.Response, err error) (*Response, er
 		pending, _ := ioutil.ReadAll(httpResponse.Body)
 		r.response = string(buffered) + string(pending)
 		r.finishedWith = fmt.Sprintf("Failed to unmarshal TelegramBotAPI response: %v\n", err)
-		return nil, errors.New("tgbot http " + r.method + " request: " + err.Error())
+		return nil, httpResponse.StatusCode, errors.New("tgbot http " + r.method + " request: " + err.Error())
 	}
 
 	remarshaledResponse, _ := json.Marshal(response)
 	r.response = string(remarshaledResponse)
 	r.finishedWith = "Success"
-	return response, nil
+	return response, httpResponse.StatusCode, nil
 }
 
 // Get GET
-func Get(botAPIURL string, methodName string, params Params) (*Response, error) {
+func Get(botAPIURL string, methodName string, params Params) (*Response, int, error) {
 	url := botAPIURL + methodName
 	if len(params) > 0 {
 		urlValues, err := params.URLValues()
 		if err != nil {
-			return nil, errors.New("tgbot.Get: " + err.Error())
+			return nil, 0, errors.New("tgbot.Get: " + err.Error())
 		}
 		url = url + "?" + urlValues.Encode()
 	}
@@ -78,34 +78,34 @@ func Get(botAPIURL string, methodName string, params Params) (*Response, error) 
 }
 
 // Post POST
-func Post(botAPIURL string, methodName string, contentType string, contentReader io.Reader) (*Response, error) {
+func Post(botAPIURL string, methodName string, contentType string, contentReader io.Reader) (*Response, int, error) {
 	url := botAPIURL + methodName
 	return newRequest("POST", url).process(http.Post(url, contentType, contentReader))
 }
 
 // PostURLEncoded POST application/x-www-form-urlencoded
-func PostURLEncoded(botAPIURL string, methodName string, params Params) (*Response, error) {
+func PostURLEncoded(botAPIURL string, methodName string, params Params) (*Response, int, error) {
 	contentReader, err := params.URLEncode()
 	if err != nil {
-		return nil, errors.New("tgbot.PostURLEncoded: " + err.Error())
+		return nil, 0, errors.New("tgbot.PostURLEncoded: " + err.Error())
 	}
 	return Post(botAPIURL, methodName, "application/x-www-form-urlencoded", contentReader)
 }
 
 // PostJSON POST application/json
-func PostJSON(botAPIURL string, methodName string, params Params) (*Response, error) {
+func PostJSON(botAPIURL string, methodName string, params Params) (*Response, int, error) {
 	contentReader, err := params.JSONEncode()
 	if err != nil {
-		return nil, errors.New("tgbot.PostJSON: " + err.Error())
+		return nil, 0, errors.New("tgbot.PostJSON: " + err.Error())
 	}
 	return Post(botAPIURL, methodName, "application/json", contentReader)
 }
 
 // PostMultipartForm POST multipart/form
-func PostMultipartForm(botAPIURL string, methodName string, params Params) (*Response, error) {
+func PostMultipartForm(botAPIURL string, methodName string, params Params) (*Response, int, error) {
 	contentReader, err := params.MultipartFormEncode()
 	if err != nil {
-		return nil, errors.New("tgbot.PostMultipartForm: " + err.Error())
+		return nil, 0, errors.New("tgbot.PostMultipartForm: " + err.Error())
 	}
 	return Post(botAPIURL, methodName, "multipart/form-data", contentReader)
 }

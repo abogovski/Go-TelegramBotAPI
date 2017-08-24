@@ -11,9 +11,14 @@ func TestGETNoParamsOk(t *testing.T) {
 		return
 	}
 
-	response, err := Get(APIURL, "getMe", Params{})
+	response, status, err := Get(APIURL, "getMe", Params{})
 	if err != nil {
 		t.Fatal("GET request to telegramBotAPI failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("GET getMe httpStatus is %v (not 200 OK)\n", status)
 		return
 	}
 
@@ -30,9 +35,14 @@ func TestGetWithParamsOk(t *testing.T) {
 		return
 	}
 
-	response, err := Get(APIURL, "getMe", Params{"limit": 5})
+	response, status, err := Get(APIURL, "getMe", Params{"limit": 5})
 	if err != nil {
 		t.Fatal("GET request to telegramBotAPI failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("GET getMe httpStatus is %v (not 200 OK)\n", status)
 		return
 	}
 
@@ -44,9 +54,14 @@ func TestGetWithParamsOk(t *testing.T) {
 
 func TestGetNotFound(t *testing.T) {
 	APIURL := GenBotAPIURL("Invalid123ID:Invalid567Token")
-	response, err := Get(APIURL, "getMe", Params{})
+	response, status, err := Get(APIURL, "getMe", Params{})
 	if err != nil {
 		t.Fatal("GET request to telegramBotAPI failed: " + err.Error())
+		return
+	}
+
+	if status != 404 {
+		t.Fatalf("GET getMe httpStatus is %v (not 404 NOT FOUND)\n", status)
 		return
 	}
 
@@ -63,9 +78,14 @@ func TestPostUrlEncodedParamsOk(t *testing.T) {
 		return
 	}
 
-	response, err := PostURLEncoded(APIURL, "getMe", Params{"limit": 5})
+	response, status, err := PostURLEncoded(APIURL, "getMe", Params{"limit": 5})
 	if err != nil {
 		t.Fatal("GET request to telegramBotAPI failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("GET getMe httpStatus is %v (not 200 OK)\n", status)
 		return
 	}
 
@@ -82,9 +102,14 @@ func TestPostJSONParamsOk(t *testing.T) {
 		return
 	}
 
-	response, err := PostJSON(APIURL, "getMe", Params{"limit": 5})
+	response, status, err := PostJSON(APIURL, "getMe", Params{"limit": 5})
 	if err != nil {
 		t.Fatal("GET request to telegramBotAPI failed: " + err.Error())
+		return
+	}
+
+	if status != 200 {
+		t.Fatalf("GET getMe httpStatus is %v (not 200 OK)\n", status)
 		return
 	}
 
