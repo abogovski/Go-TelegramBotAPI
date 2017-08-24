@@ -43,7 +43,7 @@ func PollUpdates(botAPIURL string, params Params, output chan<- Update, stop *in
 			offset = update.UpdateID + 1
 			output <- update
 		}
-		return 0, true
+		return offset, true
 	}
 
 	return PollUpdatesCB(botAPIURL, params, handleUpdates)
