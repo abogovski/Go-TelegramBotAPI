@@ -34,7 +34,7 @@ func GetMe(botAPIURL string) (*User, error) {
 
 // SendMessage https://core.telegram.org/bots/api#sendmessage
 func SendMessage(botAPIURL string, params Params) (*Message, error) {
-	response, err := Get(botAPIURL, "getSendMessage", Params{})
+	response, err := Get(botAPIURL, "sendMessage", Params{})
 	if err != nil {
 		return nil, errors.New("tgbot.sendMessage: " + err.Error())
 	}
